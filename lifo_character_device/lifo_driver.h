@@ -19,23 +19,47 @@
 #ifndef __CHR_DUMMY_DRIVER__
 #define __CHR_DUMMY_DRIVER__
 
-#define DEFAULT_BLOCK_SIZE 1024
-#define DEFAULT_MAX_BLOCKS 100
+// byte size per memory block
+#define DEVICE_DEFAULT_BLOCK_SIZE 1024
+// number of maximum blocks
+#define DEVICE_DEFAULT_MAX_BLOCKS 100
+// device name
+#define DEVICE_NAME	"lifo_device"
+//device class
+#define DEVICE_CLASS_NAME "lifo_device_class"
+// device description
+#define DEVICE_DES "LIFO MEMORY DEVICE"
+// device author
+#define DEVICE_AUTHOR "Kunal Dawn <kunal.dawn@gmail.com>"
+// device license
+#define DEVICE_LICENSE "GPL"
+// device version
+#define DEVICE_VERSION "0.1"
 
+// structure to store block of memory
 typedef struct memblock {
+	// data block
 	char *data;
+	// pointer to next memory block
 	struct memblock *next;
-}memblock;
+} memblock;
 
-typedef struct dummychr_device
-{
+// structure to store device information
+typedef struct lifo_device {
+	// major number of the device
 	int major_number;
+	// minor number of the device
 	int minor_number;
+	// total allocated blocks on this device
 	int total_blocks;
+	// total data present on the device
 	int total_data;
-	memblock *data_block;
-	struct cdev *chr_device;
-	struct class *chr_device_class;
-}dummychr_device;
+	// linked list header to memory blocks
+	memblock *block_header;
+	// character device structure
+	struct cdev cdev;
+	// device class
+	struct class *classp;
+} lifo_device;
 
 #endif

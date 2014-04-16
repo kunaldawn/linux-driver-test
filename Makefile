@@ -1,6 +1,5 @@
-obj-m += chrdummydriver.o dummy.o
-
+SUBDIRS = null_character_device lifo_character_device
 all:
-	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
+	 $(foreach var,$(SUBDIRS),cd $(var) && make && cd ..;)
 clean:
-	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
+	$(foreach var,$(SUBDIRS),cd $(var) && make clean && cd ..;)
