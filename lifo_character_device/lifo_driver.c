@@ -59,18 +59,19 @@ static struct file_operations lifo_ops =
 		{ .owner = THIS_MODULE, .open = lifo_open, .release = lifo_close,
 				.read = lifo_read, .write = lifo_write, };
 
-static int init_lifo_device_structure(lifo_device *dev) {
+static int init_lifo_device_structure(void) {
 	// allocate memory for lifo device structure
-	dev = (lifo_device *) kmalloc(sizeof(lifo_device), GFP_KERNEL);
+	dev = kmalloc(sizeof(lifo_device), GFP_KERNEL);
 
 	// check if allocation was successful
 	if (dev == NULL) {
+		printk(KERN_DEBUG "LIFO DRIVER : ALLOC FAIL 1\n");
 		//return error code
 		return 0;
 	}
 
 	// allocate memory for memblock header
-	dev->block_header = (memblock *) kmalloc(sizeof(memblock), GFP_KERNEL);
+	dev->block_header = kmalloc(sizeof(memblock), GFP_KERNEL);
 	// check if allocation was successful
 	if (dev->block_header == NULL) {
 		//return error code
@@ -92,7 +93,7 @@ static int init_lifo_device_structure(lifo_device *dev) {
 	return 1;
 }
 
-static void free_dummy_device(lifo_device *dev) {
+static void free_dummy_device(void) {
 	// free allocated memory for block header
 	kfree(dev->block_header);
 	// free allocated memory for device info
@@ -106,7 +107,7 @@ static int __init lifo_device_init(void) {
 	printk(KERN_EMERG "LIFO DRIVER : LOADING\n");
 
 	// allocate and init lifo device info
-	if (init_lifo_device_structure(dev)) {
+	if (init_lifo_device_structure() == 0) {
 		// print debug msg
 		printk(KERN_DEBUG "LIFO DRIVER : INIT FAIL(MEMORY ALLOCATION)\n");
 		// return error code
@@ -187,7 +188,7 @@ static void __exit lifo_device_exit(void) {
 	// unregister device region
 	unregister_chrdev_region(first, 1);
 	// free allocated memory
-	free_dummy_device(dev);
+	free_dummy_device();
 	// print debug message
 	printk(KERN_EMERG "LIFO DRIVER : UNLOADED\n");
 }

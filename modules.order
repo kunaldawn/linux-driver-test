@@ -1,2 +1,2 @@
-kernel//home/kunaldawn/Desktop/TEST/lindrivertest/chrdummydriver.ko
-kernel//home/kunaldawn/Desktop/TEST/lindrivertest/dummy.ko
+kernel//home/kunaldawn/Desktop/TEST/lindrivertest/lifo_character_device/lifo_driver.ko
+kernel//home/kunaldawn/Desktop/TEST/lindrivertest/null_character_device/dummy.ko

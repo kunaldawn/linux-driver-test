@@ -1,5 +1,7 @@
-SUBDIRS = null_character_device lifo_character_device
+obj-m += 	lifo_character_device/lifo_driver.o \
+			null_character_device/dummy.o
+
 all:
-	 $(foreach var,$(SUBDIRS),cd $(var) && make && cd ..;)
+	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
 clean:
-	$(foreach var,$(SUBDIRS),cd $(var) && make clean && cd ..;)
+	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
