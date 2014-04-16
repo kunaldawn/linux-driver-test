@@ -1,5 +1,5 @@
 #include<linux/module.h>
-#include<linux/version.h>
+#include<linux/errno.h>
 #include<linux/kernel.h>
 #include<linux/types.h>
 #include<linux/fs.h>
@@ -8,6 +8,7 @@
 #include<linux/cdev.h>
 #include<linux/slab.h>
 #include<asm/uaccess.h>
+#include <uapi/asm-generic/errno-base.h>
 
 static dev_t dev; // first device number
 static struct cdev c_dev; // char device structure
