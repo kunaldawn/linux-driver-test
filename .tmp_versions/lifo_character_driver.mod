@@ -1,2 +1,0 @@
-/home/kunaldawn/Desktop/TEST/lindrivertest/lifo_character_driver/lifo_character_driver.ko
-/home/kunaldawn/Desktop/TEST/lindrivertest/lifo_character_driver/lifo_character_driver.o
