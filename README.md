@@ -1,4 +1,4 @@
-dummy-driver devl base
+linux-device-driver devl base
 ======================
 Linux device driver test code repo.
 
@@ -72,7 +72,7 @@ Here are the steps to remove annoying
 - Ready to go.
 
 ### LICENSE : GPLv3, 29 June 2007 
-dummy-driver devl base
+linux-device-driver
 Copyright (C) 2014  Kunal Dawn <kunal.dawn@gmail.com>
 
 This program is free software: you can redistribute it and/or modify

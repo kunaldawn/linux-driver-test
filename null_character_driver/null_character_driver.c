@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-//dummy-driver devl base
+//linux-device-driver
 //Copyright (C) 2014  Kunal Dawn <kunal.dawn@gmail.com>
 //
 //This program is free software: you can redistribute it and/or modify
