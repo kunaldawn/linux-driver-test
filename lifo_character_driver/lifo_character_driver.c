@@ -27,10 +27,10 @@
 #include <linux/slab.h>
 #include <asm/uaccess.h>
 #include <uapi/asm-generic/errno-base.h>
-#include "lifo_driver.h"
+#include "lifo_character_driver.h"
 
 // lifo device structure
-static lifo_device *dev;
+static lifo_driver *dev;
 
 static int lifo_open(struct inode *i, struct file *f) {
 	printk(KERN_DEBUG "LIFO DRIVER : OPEN CALL\n");
@@ -61,7 +61,7 @@ static struct file_operations lifo_ops =
 
 static int init_lifo_device_structure(void) {
 	// allocate memory for lifo device structure
-	dev = kmalloc(sizeof(lifo_device), GFP_KERNEL);
+	dev = kmalloc(sizeof(lifo_driver), GFP_KERNEL);
 
 	// check if allocation was successful
 	if (dev == NULL) {
@@ -115,7 +115,7 @@ static int __init lifo_device_init(void) {
 	}
 
 	// allocate first major and minor number and register device region
-	if (alloc_chrdev_region(&first, 0, 1, DEVICE_NAME) < 0) {
+	if (alloc_chrdev_region(&first, 0, 1, DRIVER_NAME) < 0) {
 		// print debug msg
 		printk(KERN_DEBUG "LIFO DRIVER : INIT FAIL(ALLOC CHR DEV)\n");
 		// return error code
@@ -123,7 +123,7 @@ static int __init lifo_device_init(void) {
 	}
 
 	// create device class
-	if ((dev->classp = class_create(THIS_MODULE, DEVICE_CLASS_NAME)) == NULL) {
+	if ((dev->classp = class_create(THIS_MODULE, DRIVER_CLASS_NAME)) == NULL) {
 		// print debug info
 		printk(KERN_DEBUG "LIFO DRIVER : INIT FAIL(CREATE_DEV_CLASS)\n");
 		// unregister device region
@@ -134,7 +134,7 @@ static int __init lifo_device_init(void) {
 
 	// create device and register with sysfs
 	if (device_create(dev->classp, NULL, first, NULL,
-	DEVICE_NAME) == NULL) {
+	DRIVER_DEVICE_FILE_NAME) == NULL) {
 		// print debug info
 		printk(KERN_DEBUG "LIFO DRIVER : INIT FAIL\n");
 		// destroy device class
@@ -199,10 +199,10 @@ module_init(lifo_device_init);
 module_exit(lifo_device_exit);
 
 // set module license
-MODULE_LICENSE(DEVICE_LICENSE);
+MODULE_LICENSE(DRIVER_LICENSE);
 // set module author
-MODULE_AUTHOR(DEVICE_AUTHOR);
+MODULE_AUTHOR(DRIVER_AUTHOR);
 // set module description
-MODULE_DESCRIPTION(DEVICE_DES);
+MODULE_DESCRIPTION(DRIVER_DESCRIPTION);
 // set module version
-MODULE_VERSION(DEVICE_VERSION);
+MODULE_VERSION(DRIVER_VERSION);

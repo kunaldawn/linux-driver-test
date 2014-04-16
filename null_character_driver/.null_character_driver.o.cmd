@@ -1,9 +1,8 @@
-cmd_/home/kunaldawn/Desktop/TEST/lindrivertest/lifo_character_device/lifo_driver.mod.o := gcc -Wp,-MD,/home/kunaldawn/Desktop/TEST/lindrivertest/lifo_character_device/.lifo_driver.mod.o.d  -nostdinc -isystem /usr/lib/gcc/i686-linux-gnu/4.8/include  -I/usr/src/linux-headers-3.11.0-19-generic/arch/x86/include -Iarch/x86/include/generated  -Iinclude -I/usr/src/linux-headers-3.11.0-19-generic/arch/x86/include/uapi -Iarch/x86/include/generated/uapi -I/usr/src/linux-headers-3.11.0-19-generic/include/uapi -Iinclude/generated/uapi -include /usr/src/linux-headers-3.11.0-19-generic/include/linux/kconfig.h -Iubuntu/include  -D__KERNEL__ -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -Werror-implicit-function-declaration -Wno-format-security -fno-delete-null-pointer-checks -O2 -m32 -msoft-float -mregparm=3 -freg-struct-return -mno-mmx -mno-sse -fno-pic -mpreferred-stack-boundary=2 -march=i686 -mtune=generic -maccumulate-outgoing-args -Wa,-mtune=generic32 -ffreestanding -fstack-protector -DCONFIG_AS_CFI=1 -DCONFIG_AS_CFI_SIGNAL_FRAME=1 -DCONFIG_AS_CFI_SECTIONS=1 -DCONFIG_AS_AVX=1 -DCONFIG_AS_AVX2=1 -pipe -Wno-sign-compare -fno-asynchronous-unwind-tables -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -mno-avx -Wframe-larger-than=1024 -Wno-unused-but-set-variable -fno-omit-frame-pointer -fno-optimize-sibling-calls -pg -Wdeclaration-after-statement -Wno-pointer-sign -fno-strict-overflow -fconserve-stack -DCC_HAVE_ASM_GOTO  -D"KBUILD_STR(s)=\#s" -D"KBUILD_BASENAME=KBUILD_STR(lifo_driver.mod)"  -D"KBUILD_MODNAME=KBUILD_STR(lifo_driver)" -DMODULE  -c -o /home/kunaldawn/Desktop/TEST/lindrivertest/lifo_character_device/lifo_driver.mod.o /home/kunaldawn/Desktop/TEST/lindrivertest/lifo_character_device/lifo_driver.mod.c
+cmd_/home/kunaldawn/Desktop/TEST/lindrivertest/null_character_driver/null_character_driver.o := gcc -Wp,-MD,/home/kunaldawn/Desktop/TEST/lindrivertest/null_character_driver/.null_character_driver.o.d  -nostdinc -isystem /usr/lib/gcc/i686-linux-gnu/4.8/include  -I/usr/src/linux-headers-3.11.0-19-generic/arch/x86/include -Iarch/x86/include/generated  -Iinclude -I/usr/src/linux-headers-3.11.0-19-generic/arch/x86/include/uapi -Iarch/x86/include/generated/uapi -I/usr/src/linux-headers-3.11.0-19-generic/include/uapi -Iinclude/generated/uapi -include /usr/src/linux-headers-3.11.0-19-generic/include/linux/kconfig.h -Iubuntu/include  -D__KERNEL__ -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -Werror-implicit-function-declaration -Wno-format-security -fno-delete-null-pointer-checks -O2 -m32 -msoft-float -mregparm=3 -freg-struct-return -mno-mmx -mno-sse -fno-pic -mpreferred-stack-boundary=2 -march=i686 -mtune=generic -maccumulate-outgoing-args -Wa,-mtune=generic32 -ffreestanding -fstack-protector -DCONFIG_AS_CFI=1 -DCONFIG_AS_CFI_SIGNAL_FRAME=1 -DCONFIG_AS_CFI_SECTIONS=1 -DCONFIG_AS_AVX=1 -DCONFIG_AS_AVX2=1 -pipe -Wno-sign-compare -fno-asynchronous-unwind-tables -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -mno-avx -Wframe-larger-than=1024 -Wno-unused-but-set-variable -fno-omit-frame-pointer -fno-optimize-sibling-calls -pg -Wdeclaration-after-statement -Wno-pointer-sign -fno-strict-overflow -fconserve-stack -DCC_HAVE_ASM_GOTO  -DMODULE  -D"KBUILD_STR(s)=\#s" -D"KBUILD_BASENAME=KBUILD_STR(null_character_driver)"  -D"KBUILD_MODNAME=KBUILD_STR(null_character_driver)" -c -o /home/kunaldawn/Desktop/TEST/lindrivertest/null_character_driver/.tmp_null_character_driver.o /home/kunaldawn/Desktop/TEST/lindrivertest/null_character_driver/null_character_driver.c
 
-source_/home/kunaldawn/Desktop/TEST/lindrivertest/lifo_character_device/lifo_driver.mod.o := /home/kunaldawn/Desktop/TEST/lindrivertest/lifo_character_device/lifo_driver.mod.c
+source_/home/kunaldawn/Desktop/TEST/lindrivertest/null_character_driver/null_character_driver.o := /home/kunaldawn/Desktop/TEST/lindrivertest/null_character_driver/null_character_driver.c
 
-deps_/home/kunaldawn/Desktop/TEST/lindrivertest/lifo_character_device/lifo_driver.mod.o := \
-    $(wildcard include/config/module/unload.h) \
+deps_/home/kunaldawn/Desktop/TEST/lindrivertest/null_character_driver/null_character_driver.o := \
   include/linux/module.h \
     $(wildcard include/config/sysfs.h) \
     $(wildcard include/config/modules.h) \
@@ -16,6 +15,7 @@ deps_/home/kunaldawn/Desktop/TEST/lindrivertest/lifo_character_device/lifo_drive
     $(wildcard include/config/tracing.h) \
     $(wildcard include/config/event/tracing.h) \
     $(wildcard include/config/ftrace/mcount/record.h) \
+    $(wildcard include/config/module/unload.h) \
     $(wildcard include/config/constructors.h) \
     $(wildcard include/config/debug/set/module/ronx.h) \
   include/linux/list.h \
@@ -541,9 +541,80 @@ deps_/home/kunaldawn/Desktop/TEST/lindrivertest/lifo_character_device/lifo_drive
     $(wildcard include/config/have/mod/arch/specific.h) \
     $(wildcard include/config/modules/use/elf/rel.h) \
     $(wildcard include/config/modules/use/elf/rela.h) \
-  include/linux/vermagic.h \
-  include/generated/utsrelease.h \
+  include/linux/fs.h \
+    $(wildcard include/config/fs/posix/acl.h) \
+    $(wildcard include/config/security.h) \
+    $(wildcard include/config/quota.h) \
+    $(wildcard include/config/fsnotify.h) \
+    $(wildcard include/config/ima.h) \
+    $(wildcard include/config/epoll.h) \
+    $(wildcard include/config/debug/writecount.h) \
+    $(wildcard include/config/file/locking.h) \
+    $(wildcard include/config/auditsyscall.h) \
+    $(wildcard include/config/block.h) \
+    $(wildcard include/config/fs/xip.h) \
+    $(wildcard include/config/migration.h) \
+  include/linux/kdev_t.h \
+  include/uapi/linux/kdev_t.h \
+  include/linux/dcache.h \
+  include/linux/rculist.h \
+  include/linux/rculist_bl.h \
+  include/linux/list_bl.h \
+  include/linux/bit_spinlock.h \
+  include/linux/lockref.h \
+  include/linux/path.h \
+  include/linux/llist.h \
+    $(wildcard include/config/arch/have/nmi/safe/cmpxchg.h) \
+  include/linux/radix-tree.h \
+  include/linux/pid.h \
+  include/linux/capability.h \
+  include/uapi/linux/capability.h \
+  include/linux/semaphore.h \
+  /usr/src/linux-headers-3.11.0-19-generic/include/uapi/linux/fiemap.h \
+  include/linux/shrinker.h \
+  include/linux/migrate_mode.h \
+  include/linux/percpu-rwsem.h \
+  include/linux/blk_types.h \
+    $(wildcard include/config/blk/cgroup.h) \
+    $(wildcard include/config/blk/dev/integrity.h) \
+  include/uapi/linux/fs.h \
+  /usr/src/linux-headers-3.11.0-19-generic/include/uapi/linux/limits.h \
+  include/linux/quota.h \
+    $(wildcard include/config/quota/netlink/interface.h) \
+  include/linux/percpu_counter.h \
+  /usr/src/linux-headers-3.11.0-19-generic/include/uapi/linux/dqblk_xfs.h \
+  include/linux/dqblk_v1.h \
+  include/linux/dqblk_v2.h \
+  include/linux/dqblk_qtree.h \
+  include/linux/projid.h \
+  include/uapi/linux/quota.h \
+  include/linux/nfs_fs_i.h \
+  include/linux/fcntl.h \
+  include/uapi/linux/fcntl.h \
+  /usr/src/linux-headers-3.11.0-19-generic/arch/x86/include/uapi/asm/fcntl.h \
+  /usr/src/linux-headers-3.11.0-19-generic/include/uapi/asm-generic/fcntl.h \
+  include/linux/device.h \
+    $(wildcard include/config/debug/devres.h) \
+    $(wildcard include/config/pinctrl.h) \
+    $(wildcard include/config/devtmpfs.h) \
+    $(wildcard include/config/sysfs/deprecated.h) \
+  include/linux/klist.h \
+  include/linux/pinctrl/devinfo.h \
+  include/linux/ratelimit.h \
+  /usr/src/linux-headers-3.11.0-19-generic/arch/x86/include/asm/device.h \
+    $(wildcard include/config/x86/dev/dma/ops.h) \
+    $(wildcard include/config/intel/iommu.h) \
+    $(wildcard include/config/amd/iommu.h) \
+  include/linux/pm_wakeup.h \
+  include/linux/cdev.h \
+  /usr/src/linux-headers-3.11.0-19-generic/arch/x86/include/asm/uaccess.h \
+    $(wildcard include/config/x86/intel/usercopy.h) \
+  /usr/src/linux-headers-3.11.0-19-generic/arch/x86/include/asm/smap.h \
+    $(wildcard include/config/x86/smap.h) \
+  /usr/src/linux-headers-3.11.0-19-generic/arch/x86/include/asm/uaccess_32.h \
+    $(wildcard include/config/debug/strict/user/copy/checks.h) \
+  include/uapi/asm-generic/errno-base.h \
 
-/home/kunaldawn/Desktop/TEST/lindrivertest/lifo_character_device/lifo_driver.mod.o: $(deps_/home/kunaldawn/Desktop/TEST/lindrivertest/lifo_character_device/lifo_driver.mod.o)
+/home/kunaldawn/Desktop/TEST/lindrivertest/null_character_driver/null_character_driver.o: $(deps_/home/kunaldawn/Desktop/TEST/lindrivertest/null_character_driver/null_character_driver.o)
 
-$(deps_/home/kunaldawn/Desktop/TEST/lindrivertest/lifo_character_device/lifo_driver.mod.o):
+$(deps_/home/kunaldawn/Desktop/TEST/lindrivertest/null_character_driver/null_character_driver.o):

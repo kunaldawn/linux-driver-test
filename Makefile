@@ -1,5 +1,5 @@
-obj-m += 	lifo_character_device/lifo_driver.o \
-			null_character_device/dummy.o
+obj-m += 	lifo_character_driver/lifo_character_driver.o \
+			null_character_driver/null_character_driver.o
 
 all:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules

@@ -20,21 +20,23 @@
 #define __CHR_DUMMY_DRIVER__
 
 // byte size per memory block
-#define DEVICE_DEFAULT_BLOCK_SIZE 1024
+#define DRIVER_DEFAULT_BLOCK_SIZE 1024
 // number of maximum blocks
-#define DEVICE_DEFAULT_MAX_BLOCKS 100
-// device name
-#define DEVICE_NAME	"lifo_device"
-//device class
-#define DEVICE_CLASS_NAME "lifo_device_class"
-// device description
-#define DEVICE_DES "LIFO MEMORY DEVICE"
-// device author
-#define DEVICE_AUTHOR "Kunal Dawn <kunal.dawn@gmail.com>"
-// device license
-#define DEVICE_LICENSE "GPL"
-// device version
-#define DEVICE_VERSION "0.1"
+#define DRIVER_DEFAULT_MAX_BLOCKS 100
+// driver name
+#define DRIVER_NAME	"lifo_chr_driver"
+// driver class
+#define DRIVER_CLASS_NAME "lifo_char_driver_class"
+// device file name in /dev/
+#define DRIVER_DEVICE_FILE_NAME "lifocdev0"
+// driver description
+#define DRIVER_DESCRIPTION "LIFO CHARACTER MEMORY DRIVER"
+// driver author
+#define DRIVER_AUTHOR "Kunal Dawn <kunal.dawn@gmail.com>"
+// driver license
+#define DRIVER_LICENSE "GPL"
+// driver version
+#define DRIVER_VERSION "0.1"
 
 // structure to store block of memory
 typedef struct memblock {
@@ -45,7 +47,7 @@ typedef struct memblock {
 } memblock;
 
 // structure to store device information
-typedef struct lifo_device {
+typedef struct lifo_driver {
 	// major number of the device
 	int major_number;
 	// minor number of the device
@@ -60,6 +62,6 @@ typedef struct lifo_device {
 	struct cdev cdev;
 	// device class
 	struct class *classp;
-} lifo_device;
+} lifo_driver;
 
 #endif

@@ -1,4 +1,4 @@
-dummy-driver devl base
+driver devl base
 ======================
 Linux device driver test code repo.
 
