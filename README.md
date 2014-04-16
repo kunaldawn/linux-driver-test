@@ -8,6 +8,7 @@ A character driver which acts as /dev/null { Black Hole of linux O.o }
 
 ##### Build
 kunaldawn@kunaldawn-VirtualBox:~/lindrivertest$ make
+
 ##### Load
 - kunaldawn@kunaldawn-VirtualBox:~/lindrivertest$ cd null_character_driver/
 - kunaldawn@kunaldawn-VirtualBox:~/lindrivertest/null_character_driver$ ls
@@ -18,6 +19,7 @@ kunaldawn@kunaldawn-VirtualBox:~/lindrivertest$ make
 - kunaldawn@kunaldawn-VirtualBox:~/lindrivertest/null_character_driver$ dmesg | grep "NULL DRIVER"
 - [ 3222.550547] NULL DRIVER : INIT REQUEST
 - [ 3222.551702] NULL DRIVER : INIT SUCCESS
+
 ##### Test
 - kunaldawn@kunaldawn-VirtualBox:~$ sudo su
 - [sudo] password for kunaldawn: 
@@ -40,6 +42,7 @@ kunaldawn@kunaldawn-VirtualBox:~/lindrivertest$ make
 - [ 3458.028640] NULL DRIVER : OPEN CALL
 - [ 3458.028668] NULL DRIVER : READ CALL
 - [ 3458.028676] NULL DRIVER : CLOSE CALL
+
 ##### Unload
 - kunaldawn@kunaldawn-VirtualBox:~/lindrivertest/null_character_driver$ sudo rmmod null_character_driver 
 - kunaldawn@kunaldawn-VirtualBox:~/lindrivertest/null_character_driver$ dmesg | grep "NULL DRIVER"
@@ -53,7 +56,7 @@ kunaldawn@kunaldawn-VirtualBox:~/lindrivertest$ make
 - [ 3458.028676] NULL DRIVER : CLOSE CALL
 - [ 3518.439426] NULL DRIVER : UNLOADED
 
-### SETUP ECLIPSE FOR DRIVER DEVELOPMENT IN UBUNTU
+### 2. SETUP ECLIPSE FOR DRIVER DEVELOPMENT IN UBUNTU
 Here are the steps to remove annoying 
 - Download linux source <sudo apt-get install linux-source>
 - Download Eclipse CDT from <https://www.eclipse.org/cdt/>
