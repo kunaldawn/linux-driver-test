@@ -19,4 +19,23 @@
 #ifndef __CHR_DUMMY_DRIVER__
 #define __CHR_DUMMY_DRIVER__
 
+#define DEFAULT_BLOCK_SIZE 1024
+#define DEFAULT_MAX_BLOCKS 100
+
+typedef struct memblock {
+	char *data;
+	struct memblock *next;
+}memblock;
+
+typedef struct dummychr_device
+{
+	int major_number;
+	int minor_number;
+	int total_blocks;
+	int total_data;
+	memblock *data_block;
+	struct cdev *chr_device;
+	struct class *chr_device_class;
+}dummychr_device;
+
 #endif
