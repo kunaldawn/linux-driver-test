@@ -59,17 +59,37 @@ static struct file_operations lifo_ops =
 		{ .owner = THIS_MODULE, .open = lifo_open, .release = lifo_close,
 				.read = lifo_read, .write = lifo_write, };
 
-static void init_lifo_device_structure(lifo_device *dev) {
+static int init_lifo_device_structure(lifo_device *dev) {
 	// allocate memory for lifo device structure
 	dev = (lifo_device *) kmalloc(sizeof(lifo_device), GFP_KERNEL);
+
+	// check if allocation was successful
+	if (dev == NULL) {
+		//return error code
+		return 0;
+	}
+
 	// allocate memory for memblock header
 	dev->block_header = (memblock *) kmalloc(sizeof(memblock), GFP_KERNEL);
-	// init device values
+	// check if allocation was successful
+	if (dev->block_header == NULL) {
+		//return error code
+		kfree(dev);
+		return 0;
+	}
+
+	// init major number
 	dev->major_number = 0;
+	// init minor number
 	dev->minor_number = 0;
+	// init total allocated memory blocks
 	dev->total_blocks = 0;
+	// init total data used
 	dev->total_data = 0;
+	// init memory block header
 	dev->block_header->next = NULL;
+	// return success code
+	return 1;
 }
 
 static void free_dummy_device(lifo_device *dev) {
@@ -84,10 +104,16 @@ static int __init lifo_device_init(void) {
 	dev_t first;
 	// print debug message
 	printk(KERN_EMERG "LIFO DRIVER : LOADING\n");
-	// allocate and init lifo device info
-	init_lifo_device_structure(dev);
 
-	// allocate character device region
+	// allocate and init lifo device info
+	if (init_lifo_device_structure(dev)) {
+		// print debug msg
+		printk(KERN_DEBUG "LIFO DRIVER : INIT FAIL(MEMORY ALLOCATION)\n");
+		// return error code
+		return -1;
+	}
+
+	// allocate first major and minor number and register device region
 	if (alloc_chrdev_region(&first, 0, 1, DEVICE_NAME) < 0) {
 		// print debug msg
 		printk(KERN_DEBUG "LIFO DRIVER : INIT FAIL(ALLOC CHR DEV)\n");
@@ -99,43 +125,70 @@ static int __init lifo_device_init(void) {
 	if ((dev->classp = class_create(THIS_MODULE, DEVICE_CLASS_NAME)) == NULL) {
 		// print debug info
 		printk(KERN_DEBUG "LIFO DRIVER : INIT FAIL(CREATE_DEV_CLASS)\n");
-		// unregister character device
+		// unregister device region
 		unregister_chrdev_region(first, 1);
 		// return error code
 		return -1;
 	}
 
-	//
+	// create device and register with sysfs
 	if (device_create(dev->classp, NULL, first, NULL,
 	DEVICE_NAME) == NULL) {
+		// print debug info
 		printk(KERN_DEBUG "LIFO DRIVER : INIT FAIL\n");
+		// destroy device class
 		class_destroy(dev->classp);
+		// unregister device region
 		unregister_chrdev_region(first, 1);
+		// return error code
 		return -1;
 	}
+
+	// set owner of cdev
 	dev->cdev.owner = THIS_MODULE;
+	// set file operations of cdev
 	dev->cdev.ops = &lifo_ops;
+	// init cdev
 	cdev_init(&dev->cdev, &lifo_ops);
+
+	// add the device to the system
 	if (cdev_add(&dev->cdev, first, 1) == -1) {
+		// print debug info
 		printk(KERN_DEBUG "LIFO DRIVER : INIT FAIL\n");
+		// destroy the device info from sysfs
 		device_destroy(dev->classp, first);
+		// destroy device class
 		class_destroy(dev->classp);
+		// unregister device region
 		unregister_chrdev_region(first, 1);
+		// return error code
 		return -1;
 	}
+
+	// save the allocated major number
 	dev->major_number = MAJOR(first);
+	// save the allocated minor number
 	dev->minor_number = MINOR(first);
+	// print debug info
 	printk(KERN_DEBUG "LIFO DRIVER : INIT SUCCESS\n");
+	// return success code
 	return 0;
 }
 
 static void __exit lifo_device_exit(void) {
+	// get the first device major/minor
 	dev_t first = MKDEV(dev->major_number, dev->minor_number);
+	// delete character device
 	cdev_del(&dev->cdev);
+	// destroy device
 	device_destroy(dev->classp, first);
+	// destroy device class
 	class_destroy(dev->classp);
+	// unregister device region
 	unregister_chrdev_region(first, 1);
+	// free allocated memory
 	free_dummy_device(dev);
+	// print debug message
 	printk(KERN_EMERG "LIFO DRIVER : UNLOADED\n");
 }
 
