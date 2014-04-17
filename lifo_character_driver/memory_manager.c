@@ -87,6 +87,40 @@ void free_all_blocks(memblock *head) {
 	}
 }
 
+void free_last_block(memblock *head) {
+	// temporary variables
+	memblock *temp, *temp1;
+	// assign to head
+	temp = head;
+	// check if any block exist
+	if (temp->next != NULL) {
+		// assign first block
+		temp1 = temp->next;
+		// check if only one block exist
+		if (temp1->next == NULL) {
+			// remove block
+			temp->next = NULL;
+			// free block data
+			kfree(temp1->data);
+			// free block
+			kfree(temp1);
+		} else {
+			// iterate to second last block
+			while (temp1->next != NULL) {
+				temp = temp1;
+				temp1 = temp1->next;
+			}
+			// remove block
+			temp->next = NULL;
+			// free block data
+			kfree(temp1->data);
+			// free block
+			kfree(temp1);
+		}
+	}
+
+}
+
 char* get_writable_buffer(memblock *head, int data_size) {
 	// variable to hold buffer starting pointer
 	char *buffer_head;
@@ -96,6 +130,19 @@ char* get_writable_buffer(memblock *head, int data_size) {
 	temp = get_last_block(head);
 	// get the writable buffer position
 	buffer_head = (temp->data + data_size);
+	// return the buffer pointer
+	return buffer_head;
+}
+
+char* get_redable_buffer(memblock *head, int data_size, int len) {
+	// variable to hold buffer starting pointer
+	char *buffer_head;
+	// temporary variable to hold last blocks pointer
+	memblock *temp;
+	// get the last allocated block
+	temp = get_last_block(head);
+	// get the writable buffer position
+	buffer_head = (temp->data + data_size - len);
 	// return the buffer pointer
 	return buffer_head;
 }

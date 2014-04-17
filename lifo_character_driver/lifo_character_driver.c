@@ -54,21 +54,55 @@ static int lifo_close(struct inode *i, struct file *f) {
 
 static ssize_t lifo_read(struct file *f, char __user *buff, size_t len,
 		loff_t *off) {
+	// temp variable
+	int data_available_on_block = 0, data_cached = 0, chunk_size = 0;
+	// temporary variable
 	lifo_driver *device;
 	// print debug info
+	char *redable_buffer;
+	char *chunk_buffer;
 	printk(KERN_DEBUG "LOFO DRIVER : READ CALL\n");
 	// get the device pointer
 	device = f->private_data;
-	if (device->total_data == 0 || device->total_data < *off) {
-		return 0;
+
+	while (1) {
+		// check if any data is available and offset is correct
+		if (device->total_data == 0) {
+			printk(KERN_DEBUG "LOFO DRIVER : NO DATA [SIZE:%d]\n",
+					device->total_data);
+			// return EOF
+			return 0;
+		}
+
+		chunk_size = data_available_on_block = (device->total_data
+				- ((device->total_blocks - 1) * DRIVER_DEFAULT_BLOCK_SIZE));
+		if (data_available_on_block == 0) {
+			free_last_block(device->block_header);
+			device->total_blocks--;
+			printk(KERN_DEBUG "LOFO DRIVER : READ [REMOVE BLOCK][BLOCKS:%d]\n",
+					device->total_blocks);
+		} else {
+			redable_buffer = get_redable_buffer(device->block_header,
+					data_available_on_block, 1);
+			if (copy_to_user(buff, redable_buffer, 1) == 0) {
+				device->total_data--;
+				printk(KERN_DEBUG "LOFO DRIVER : READ SUCCESS [SIZE:%d]\n",
+						device->total_data);
+				return 1;
+			}
+			return -EFAULT;
+		}
 	}
 
-	return 0;
+	// return error
+	return -EFAULT;
 }
 
 static ssize_t lifo_write(struct file *f, const char __user *buff, size_t len,
 		loff_t *off) {
+	// temporary variables
 	int freespace_inblock = 0, data_to_write = 0, data_not_copied = 0;
+	// pointer to writable buffer starting position
 	char *writable_buffer;
 	// get the device pointer
 	lifo_driver *device = f->private_data;
@@ -76,43 +110,77 @@ static ssize_t lifo_write(struct file *f, const char __user *buff, size_t len,
 	printk(
 	KERN_DEBUG "LIFO DRIVER : WRITE CALL");
 
+	// calculate free space in last block, if any
 	freespace_inblock = ((device->total_blocks * DRIVER_DEFAULT_BLOCK_SIZE)
 			- device->total_data);
+
+	// check if there is any free space
 	if (freespace_inblock > 0) {
+		// get the writable buffer from the block
 		writable_buffer = get_writable_buffer(device->block_header,
 		DRIVER_DEFAULT_BLOCK_SIZE - freespace_inblock);
+
+		// calculate how much data we can write in this call
 		data_to_write = (len <= freespace_inblock) ? len : freespace_inblock;
+
+		// copy data from user space to kernel space
 		data_not_copied = copy_from_user(writable_buffer, buff, data_to_write);
+
+		// update total data counter
 		device->total_data += data_to_write - data_not_copied;
+
+		// print debug info
 		printk(
 				KERN_DEBUG "LIFO DRIVER : WRITE SUCCESS [BLOCKS:%d][SIZE:%d][WRITE:%d/%d]\n",
 				device->total_blocks, device->total_data, len,
 				data_to_write - data_not_copied);
+		// return byte count that have been successfully copied
 		return data_to_write - data_not_copied;
 	}
 
+	// there is no free space in the last block, or no block at all.
+	// check if new block allocation is possible
 	if (device->total_blocks >= DRIVER_DEFAULT_MAX_BLOCKS) {
+		// print debug info
 		printk(
 		KERN_DEBUG "LIFO DRIVER : WRITE FAIL : MAX_BLOCKS\n");
+		// return error code
 		return -EFAULT;
 	}
 
+	// check memory allocation was success
 	if (allocate_new_block(device->block_header) == 1) {
+		// print debug info
 		printk(
 		KERN_DEBUG "LIFO DRIVER : WRITE FAIL : MEMORY_ALLOCATION\n");
+		// return error code
 		return -EFAULT;
 	}
+
+	// increment available blocks count
 	device->total_blocks++;
+
+	// get the pointer to writable buffer
 	writable_buffer = get_writable_buffer(device->block_header, 0);
+
+	// calculate how much data to write
 	data_to_write =
 			(len <= DRIVER_DEFAULT_BLOCK_SIZE) ?
 					len : DRIVER_DEFAULT_BLOCK_SIZE;
+
+	// copy data from user space to kernel space
 	data_not_copied = copy_from_user(writable_buffer, buff, data_to_write);
+
+	// update total data counter
 	device->total_data += data_to_write - data_not_copied;
+
+	// print debug info
 	printk(
 			KERN_DEBUG "LIFO DRIVER : WRITE SUCCESS[NEW BLOCK] WRITE SUCCESS [BLOCKS:%d][SIZE:%d][WRITE:%d/%d]\n",
 			device->total_blocks, device->total_data, len,
 			data_to_write - data_not_copied);
+
+	// return how much data actually copied
 	return data_to_write - data_not_copied;
 }
 
