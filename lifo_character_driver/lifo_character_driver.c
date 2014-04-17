@@ -28,12 +28,15 @@
 #include <asm/uaccess.h>
 #include <uapi/asm-generic/errno-base.h>
 #include "lifo_character_driver.h"
+#include "memory_manager.h"
 
 // lifo device structure
 static lifo_driver *dev;
 
 static int lifo_open(struct inode *i, struct file *f) {
 	printk(KERN_DEBUG "LIFO DRIVER : OPEN CALL\n");
+	lifo_driver *device = container_of(i->i_cdev, lifo_driver, cdev);
+	f->private_data = device;
 	return 0;
 }
 
@@ -45,6 +48,11 @@ static int lifo_close(struct inode *i, struct file *f) {
 static ssize_t lifo_read(struct file *f, char __user *buff, size_t len,
 		loff_t *off) {
 	printk(KERN_DEBUG "LOFO DRIVER : READ CALL\n");
+	lifo_driver *device = f.private_data;
+	if (device->total_data == 0 || device->total_data < *off) {
+		return 0;
+	}
+
 	return 0;
 }
 
