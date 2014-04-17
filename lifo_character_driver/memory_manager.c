@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-//dummy-driver devl base
+//linux-device-driver
 //Copyright (C) 2014  Kunal Dawn <kunal.dawn@gmail.com>
 //
 //This program is free software: you can redistribute it and/or modify
@@ -61,4 +61,28 @@ memblock * get_last_block(memblock *head) {
 		temp = temp->next;
 	}
 	return temp;
+}
+
+void free_all_blocks(memblock *head) {
+	// temporary memblock pointers
+	memblock *temp, *temp1;
+
+	// check if any blocks available
+	if (head->next == NULL) {
+		// return
+		return;
+	}
+	// go to first block
+	temp = head->next;
+	// iterate through all blocks
+	while (temp != NULL) {
+		// store next blocks pointer
+		temp1 = temp->next;
+		// free blocks data
+		kfree(temp->data);
+		// free block
+		kfree(temp);
+		// set next block
+		temp = temp1;
+	}
 }

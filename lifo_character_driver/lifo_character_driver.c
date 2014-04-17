@@ -59,6 +59,8 @@ static ssize_t lifo_read(struct file *f, char __user *buff, size_t len,
 static ssize_t lifo_write(struct file *f, const char __user *buff, size_t len,
 		loff_t *off) {
 	printk(KERN_DEBUG "LIFO DRIVER : WRITE CALL\n");
+	lifo_driver *device = f.private_data;
+
 	return EFAULT;
 }
 
