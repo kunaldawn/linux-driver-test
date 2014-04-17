@@ -86,3 +86,16 @@ void free_all_blocks(memblock *head) {
 		temp = temp1;
 	}
 }
+
+char* get_writable_buffer(memblock *head, int data_size) {
+	// variable to hold buffer starting pointer
+	char *buffer_head;
+	// temporary variable to hold last blocks pointer
+	memblock *temp;
+	// get the last allocated block
+	temp = get_last_block(head);
+	// get the writable buffer position
+	buffer_head = (temp->data + data_size);
+	// return the buffer pointer
+	return buffer_head;
+}

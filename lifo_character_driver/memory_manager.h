@@ -24,5 +24,6 @@
 memblock * get_last_block(memblock *head);
 int allocate_new_block(memblock * head);
 void free_all_blocks(memblock *head);
+char* get_writable_buffer(memblock *head, int data_size);
 
 #endif

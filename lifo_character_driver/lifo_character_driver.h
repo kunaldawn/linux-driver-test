@@ -18,11 +18,12 @@
 
 #ifndef __CHR_DUMMY_DRIVER__
 #define __CHR_DUMMY_DRIVER__
+#include <linux/cdev.h>
 
 // byte size per memory block
-#define DRIVER_DEFAULT_BLOCK_SIZE 1024
+#define DRIVER_DEFAULT_BLOCK_SIZE 4
 // number of maximum blocks
-#define DRIVER_DEFAULT_MAX_BLOCKS 100
+#define DRIVER_DEFAULT_MAX_BLOCKS 10
 // driver name
 #define DRIVER_NAME	"lifo_chr_driver"
 // driver class
