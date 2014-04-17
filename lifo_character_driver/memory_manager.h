@@ -21,11 +21,17 @@
 
 #include "lifo_character_driver.h"
 
+// get last memory block available
 memblock * get_last_block(memblock *head);
+// allocate new memory block at the end
 int allocate_new_block(memblock * head);
+// free all space reserved by all blocks
 void free_all_blocks(memblock *head);
+// get pointer to writable space in blocks data buffer
 char* get_writable_buffer(memblock *head, int data_size);
-char* get_redable_buffer(memblock *head, int data_size, int len);
+// get pointer to readable space in blocks data buffer
+char* get_readable_buffer(memblock *head, int data_size, int len);
+// free last allocated block
 void free_last_block(memblock *head);
 
 #endif

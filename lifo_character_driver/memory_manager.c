@@ -134,7 +134,7 @@ char* get_writable_buffer(memblock *head, int data_size) {
 	return buffer_head;
 }
 
-char* get_redable_buffer(memblock *head, int data_size, int len) {
+char* get_readable_buffer(memblock *head, int data_size, int len) {
 	// variable to hold buffer starting pointer
 	char *buffer_head;
 	// temporary variable to hold last blocks pointer

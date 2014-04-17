@@ -21,11 +21,9 @@
 #include <linux/cdev.h>
 
 // byte size per memory block
-#define DRIVER_DEFAULT_BLOCK_SIZE 4
+#define DRIVER_DEFAULT_BLOCK_SIZE 1024
 // number of maximum blocks
 #define DRIVER_DEFAULT_MAX_BLOCKS 10
-// number of characters to read per call
-#define DEIVER_DEFAULT_READ_LEN 10
 // driver name
 #define DRIVER_NAME	"lifo_chr_driver"
 // driver class

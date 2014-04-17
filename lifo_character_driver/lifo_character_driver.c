@@ -55,41 +55,54 @@ static int lifo_close(struct inode *i, struct file *f) {
 static ssize_t lifo_read(struct file *f, char __user *buff, size_t len,
 		loff_t *off) {
 	// temp variable
-	int data_available_on_block = 0, data_cached = 0, chunk_size = 0;
+	int data_available_on_block = 0;
 	// temporary variable
 	lifo_driver *device;
 	// print debug info
 	char *redable_buffer;
-	char *chunk_buffer;
-	printk(KERN_DEBUG "LOFO DRIVER : READ CALL\n");
+	printk(KERN_DEBUG "LIFO DRIVER : READ CALL\n");
 	// get the device pointer
 	device = f->private_data;
 
+	// loop for ever
 	while (1) {
-		// check if any data is available and offset is correct
+		// check if any data is available
 		if (device->total_data == 0) {
-			printk(KERN_DEBUG "LOFO DRIVER : NO DATA [SIZE:%d]\n",
+			printk(KERN_DEBUG "LIFO DRIVER : NO DATA [SIZE:%d]\n",
 					device->total_data);
 			// return EOF
 			return 0;
 		}
 
-		chunk_size = data_available_on_block = (device->total_data
+		// calculate available data in last block
+		data_available_on_block = (device->total_data
 				- ((device->total_blocks - 1) * DRIVER_DEFAULT_BLOCK_SIZE));
+
+		// check if any data is available in last block
 		if (data_available_on_block == 0) {
+			// free last block
 			free_last_block(device->block_header);
+			// reduce block counter
 			device->total_blocks--;
-			printk(KERN_DEBUG "LOFO DRIVER : READ [REMOVE BLOCK][BLOCKS:%d]\n",
+			// print debug info
+			printk(KERN_DEBUG "LIFO DRIVER : READ [REMOVE BLOCK][BLOCKS:%d]\n",
 					device->total_blocks);
 		} else {
-			redable_buffer = get_redable_buffer(device->block_header,
+			// get readable buffer from last block
+			redable_buffer = get_readable_buffer(device->block_header,
 					data_available_on_block, 1);
+
+			// copy data from kernel space to user space
 			if (copy_to_user(buff, redable_buffer, 1) == 0) {
+				// reduce data counter
 				device->total_data--;
-				printk(KERN_DEBUG "LOFO DRIVER : READ SUCCESS [SIZE:%d]\n",
+				// print debug info
+				printk(KERN_DEBUG "LIFO DRIVER : READ SUCCESS [SIZE:%d]\n",
 						device->total_data);
+				// return amount of data read
 				return 1;
 			}
+			// return error code
 			return -EFAULT;
 		}
 	}
