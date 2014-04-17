@@ -1,2 +1,0 @@
-/home/kunaldawn/Desktop/TEST/lindrivertest/null_character_driver/null_character_driver.ko
-/home/kunaldawn/Desktop/TEST/lindrivertest/null_character_driver/null_character_driver.o
