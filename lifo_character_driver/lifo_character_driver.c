@@ -105,12 +105,13 @@ static ssize_t lifo_read(struct file *f, char __user *buff, size_t len,
 			// get readable buffer from last block
 			redable_buffer = get_readable_buffer(device->block_header,
 					data_available_on_block, data_to_read);
-			data_read_counter = data_to_read;
+			data_read_counter = data_to_read - 1;
 
 			// copy data in reverse order
 			while (data_read_counter >= 0) {
-				if (copy_to_user(buff, redable_buffer + data_read_counter, 1)
-						!= 0) {
+				if (copy_to_user(
+						buff + data_to_read - data_read_counter - 1,
+						redable_buffer + data_read_counter, 1) != 0) {
 					// unlock mutex
 					up(&device->sem);
 
