@@ -19,11 +19,14 @@
 #ifndef __CHR_DUMMY_DRIVER__
 #define __CHR_DUMMY_DRIVER__
 #include <linux/cdev.h>
+#include <linux/semaphore.h>
 
 // byte size per memory block
 #define DRIVER_DEFAULT_BLOCK_SIZE 1024
 // number of maximum blocks
 #define DRIVER_DEFAULT_MAX_BLOCKS 10
+// default read chunk size
+#define DRIVER_DEFAULT_READ_CHUNK_SIZE 3
 // driver name
 #define DRIVER_NAME	"lifo_chr_driver"
 // driver class
@@ -63,6 +66,8 @@ typedef struct lifo_driver {
 	struct cdev cdev;
 	// device class
 	struct class *classp;
+	// semaphore
+	struct semaphore sem;
 } lifo_driver;
 
 #endif

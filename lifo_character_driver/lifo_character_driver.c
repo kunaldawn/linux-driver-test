@@ -26,6 +26,7 @@
 #include <linux/cdev.h>
 #include <linux/slab.h>
 #include <asm/uaccess.h>
+#include <linux/semaphore.h>
 #include <uapi/asm-generic/errno-base.h>
 #include "lifo_character_driver.h"
 #include "memory_manager.h"
@@ -64,12 +65,22 @@ static ssize_t lifo_read(struct file *f, char __user *buff, size_t len,
 	// get the device pointer
 	device = f->private_data;
 
+	// mutex lock
+	if (down_interruptible(&device->sem)) {
+		// return error code for interrupted
+		return -ERESTARTSYS;
+	}
+
 	// loop for ever
 	while (1) {
 		// check if any data is available
 		if (device->total_data == 0) {
 			printk(KERN_DEBUG "LIFO DRIVER : NO DATA [SIZE:%d]\n",
 					device->total_data);
+
+			// unlock mutex
+			up(&device->sem);
+
 			// return EOF
 			return 0;
 		}
@@ -99,13 +110,24 @@ static ssize_t lifo_read(struct file *f, char __user *buff, size_t len,
 				// print debug info
 				printk(KERN_DEBUG "LIFO DRIVER : READ SUCCESS [SIZE:%d]\n",
 						device->total_data);
+
+				// unlock mutex
+				up(&device->sem);
+
 				// return amount of data read
 				return 1;
 			}
+
+			// unlock mutex
+			up(&device->sem);
+
 			// return error code
 			return -EFAULT;
 		}
 	}
+
+	// unlock mutex
+	up(&device->sem);
 
 	// return error
 	return -EFAULT;
@@ -122,6 +144,12 @@ static ssize_t lifo_write(struct file *f, const char __user *buff, size_t len,
 	// print debug info
 	printk(
 	KERN_DEBUG "LIFO DRIVER : WRITE CALL");
+
+	// mutex lock
+	if (down_interruptible(&device->sem)) {
+		// return error code for interrupted
+		return -ERESTARTSYS;
+	}
 
 	// calculate free space in last block, if any
 	freespace_inblock = ((device->total_blocks * DRIVER_DEFAULT_BLOCK_SIZE)
@@ -147,6 +175,10 @@ static ssize_t lifo_write(struct file *f, const char __user *buff, size_t len,
 				KERN_DEBUG "LIFO DRIVER : WRITE SUCCESS [BLOCKS:%d][SIZE:%d][WRITE:%d/%d]\n",
 				device->total_blocks, device->total_data, len,
 				data_to_write - data_not_copied);
+
+		// unlock mutex
+		up(&device->sem);
+
 		// return byte count that have been successfully copied
 		return data_to_write - data_not_copied;
 	}
@@ -157,6 +189,10 @@ static ssize_t lifo_write(struct file *f, const char __user *buff, size_t len,
 		// print debug info
 		printk(
 		KERN_DEBUG "LIFO DRIVER : WRITE FAIL : MAX_BLOCKS\n");
+
+		// unlock mutex
+		up(&device->sem);
+
 		// return error code
 		return -EFAULT;
 	}
@@ -166,6 +202,10 @@ static ssize_t lifo_write(struct file *f, const char __user *buff, size_t len,
 		// print debug info
 		printk(
 		KERN_DEBUG "LIFO DRIVER : WRITE FAIL : MEMORY_ALLOCATION\n");
+
+		// unlock mutex
+		up(&device->sem);
+
 		// return error code
 		return -EFAULT;
 	}
@@ -192,6 +232,9 @@ static ssize_t lifo_write(struct file *f, const char __user *buff, size_t len,
 			KERN_DEBUG "LIFO DRIVER : WRITE SUCCESS[NEW BLOCK] WRITE SUCCESS [BLOCKS:%d][SIZE:%d][WRITE:%d/%d]\n",
 			device->total_blocks, device->total_data, len,
 			data_to_write - data_not_copied);
+
+	// unlock mutex
+	up(&device->sem);
 
 	// return how much data actually copied
 	return data_to_write - data_not_copied;
@@ -294,6 +337,10 @@ static int __init lifo_device_init(void) {
 	dev->cdev.owner = THIS_MODULE;
 	// set file operations of cdev
 	dev->cdev.ops = &lifo_ops;
+
+	// init semaphore
+	sema_init(&dev->sem, 1);
+
 	// init cdev
 	cdev_init(&dev->cdev, &lifo_ops);
 
