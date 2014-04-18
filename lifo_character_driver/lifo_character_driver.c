@@ -56,7 +56,7 @@ static int lifo_close(struct inode *i, struct file *f) {
 static ssize_t lifo_read(struct file *f, char __user *buff, size_t len,
 		loff_t *off) {
 	// temp variable
-	int data_available_on_block = 0;
+	int data_available_on_block = 0, data_to_read = 0, data_read_counter = 0;
 	// temporary variable
 	lifo_driver *device;
 	// print debug info
@@ -75,8 +75,7 @@ static ssize_t lifo_read(struct file *f, char __user *buff, size_t len,
 	while (1) {
 		// check if any data is available
 		if (device->total_data == 0) {
-			printk(KERN_DEBUG "LIFO DRIVER : NO DATA [SIZE:%d]\n",
-					device->total_data);
+			printk(KERN_DEBUG "LIFO DRIVER : NO DATA\n");
 
 			// unlock mutex
 			up(&device->sem);
@@ -89,9 +88,13 @@ static ssize_t lifo_read(struct file *f, char __user *buff, size_t len,
 		data_available_on_block = (device->total_data
 				- ((device->total_blocks - 1) * DRIVER_DEFAULT_BLOCK_SIZE));
 
+		// calculate data to read from this block
+		data_to_read =
+				(data_available_on_block < len) ? data_available_on_block : len;
+
 		// check if any data is available in last block
 		if (data_available_on_block == 0) {
-			// free last block
+			// free last block because no data available in this block
 			free_last_block(device->block_header);
 			// reduce block counter
 			device->total_blocks--;
@@ -101,28 +104,35 @@ static ssize_t lifo_read(struct file *f, char __user *buff, size_t len,
 		} else {
 			// get readable buffer from last block
 			redable_buffer = get_readable_buffer(device->block_header,
-					data_available_on_block, 1);
+					data_available_on_block, data_to_read);
+			data_read_counter = data_to_read;
 
-			// copy data from kernel space to user space
-			if (copy_to_user(buff, redable_buffer, 1) == 0) {
-				// reduce data counter
-				device->total_data--;
-				// print debug info
-				printk(KERN_DEBUG "LIFO DRIVER : READ SUCCESS [SIZE:%d]\n",
-						device->total_data);
+			// copy data in reverse order
+			while (data_read_counter >= 0) {
+				if (copy_to_user(buff, redable_buffer + data_read_counter, 1)
+						!= 0) {
+					// unlock mutex
+					up(&device->sem);
 
-				// unlock mutex
-				up(&device->sem);
-
-				// return amount of data read
-				return 1;
+					// return error code
+					return -EFAULT;
+				}
+				// decrement read counter
+				data_read_counter--;
 			}
+
+			// decrement data counter
+			device->total_data -= data_to_read;
+
+			// print debug info
+			printk(KERN_DEBUG "LIFO DRIVER : READ SUCCESS [SIZE:%d/%d]\n",
+					data_to_read, len);
 
 			// unlock mutex
 			up(&device->sem);
 
-			// return error code
-			return -EFAULT;
+			// return amount of data read
+			return data_to_read;
 		}
 	}
 
@@ -135,27 +145,27 @@ static ssize_t lifo_read(struct file *f, char __user *buff, size_t len,
 
 static ssize_t lifo_write(struct file *f, const char __user *buff, size_t len,
 		loff_t *off) {
-	// temporary variables
+// temporary variables
 	int freespace_inblock = 0, data_to_write = 0, data_not_copied = 0;
-	// pointer to writable buffer starting position
+// pointer to writable buffer starting position
 	char *writable_buffer;
-	// get the device pointer
+// get the device pointer
 	lifo_driver *device = f->private_data;
-	// print debug info
+// print debug info
 	printk(
 	KERN_DEBUG "LIFO DRIVER : WRITE CALL");
 
-	// mutex lock
+// mutex lock
 	if (down_interruptible(&device->sem)) {
 		// return error code for interrupted
 		return -ERESTARTSYS;
 	}
 
-	// calculate free space in last block, if any
+// calculate free space in last block, if any
 	freespace_inblock = ((device->total_blocks * DRIVER_DEFAULT_BLOCK_SIZE)
 			- device->total_data);
 
-	// check if there is any free space
+// check if there is any free space
 	if (freespace_inblock > 0) {
 		// get the writable buffer from the block
 		writable_buffer = get_writable_buffer(device->block_header,
@@ -183,8 +193,8 @@ static ssize_t lifo_write(struct file *f, const char __user *buff, size_t len,
 		return data_to_write - data_not_copied;
 	}
 
-	// there is no free space in the last block, or no block at all.
-	// check if new block allocation is possible
+// there is no free space in the last block, or no block at all.
+// check if new block allocation is possible
 	if (device->total_blocks >= DRIVER_DEFAULT_MAX_BLOCKS) {
 		// print debug info
 		printk(
@@ -197,7 +207,7 @@ static ssize_t lifo_write(struct file *f, const char __user *buff, size_t len,
 		return -EFAULT;
 	}
 
-	// check memory allocation was success
+// check memory allocation was success
 	if (allocate_new_block(device->block_header) == 1) {
 		// print debug info
 		printk(
@@ -210,33 +220,33 @@ static ssize_t lifo_write(struct file *f, const char __user *buff, size_t len,
 		return -EFAULT;
 	}
 
-	// increment available blocks count
+// increment available blocks count
 	device->total_blocks++;
 
-	// get the pointer to writable buffer
+// get the pointer to writable buffer
 	writable_buffer = get_writable_buffer(device->block_header, 0);
 
-	// calculate how much data to write
+// calculate how much data to write
 	data_to_write =
 			(len <= DRIVER_DEFAULT_BLOCK_SIZE) ?
 					len : DRIVER_DEFAULT_BLOCK_SIZE;
 
-	// copy data from user space to kernel space
+// copy data from user space to kernel space
 	data_not_copied = copy_from_user(writable_buffer, buff, data_to_write);
 
-	// update total data counter
+// update total data counter
 	device->total_data += data_to_write - data_not_copied;
 
-	// print debug info
+// print debug info
 	printk(
 			KERN_DEBUG "LIFO DRIVER : WRITE SUCCESS[NEW BLOCK] WRITE SUCCESS [BLOCKS:%d][SIZE:%d][WRITE:%d/%d]\n",
 			device->total_blocks, device->total_data, len,
 			data_to_write - data_not_copied);
 
-	// unlock mutex
+// unlock mutex
 	up(&device->sem);
 
-	// return how much data actually copied
+// return how much data actually copied
 	return data_to_write - data_not_copied;
 }
 
@@ -246,55 +256,55 @@ static struct file_operations lifo_ops =
 				.read = lifo_read, .write = lifo_write, };
 
 static int init_lifo_device_structure(void) {
-	// allocate memory for lifo device structure
+// allocate memory for lifo device structure
 	dev = kmalloc(sizeof(lifo_driver), GFP_KERNEL);
 
-	// check if allocation was successful
+// check if allocation was successful
 	if (dev == NULL) {
 		printk(KERN_DEBUG "LIFO DRIVER : ALLOC FAIL 1\n");
 		//return error code
 		return 0;
 	}
 
-	// allocate memory for memblock header
+// allocate memory for memblock header
 	dev->block_header = kmalloc(sizeof(memblock), GFP_KERNEL);
-	// check if allocation was successful
+// check if allocation was successful
 	if (dev->block_header == NULL) {
 		//return error code
 		kfree(dev);
 		return 0;
 	}
 
-	// init major number
+// init major number
 	dev->major_number = 0;
-	// init minor number
+// init minor number
 	dev->minor_number = 0;
-	// init total allocated memory blocks
+// init total allocated memory blocks
 	dev->total_blocks = 0;
-	// init total data used
+// init total data used
 	dev->total_data = 0;
-	// init memory block header
+// init memory block header
 	dev->block_header->next = NULL;
-	// return success code
+// return success code
 	return 1;
 }
 
 static void free_dummy_device(void) {
-	// free all allocated blocks
+// free all allocated blocks
 	free_all_blocks(dev->block_header);
-	// free allocated memory for block header
+// free allocated memory for block header
 	kfree(dev->block_header);
-	// free allocated memory for device info
+// free allocated memory for device info
 	kfree(dev);
 }
 
 static int __init lifo_device_init(void) {
-	// var to hold first major/minor number
+// var to hold first major/minor number
 	dev_t first;
-	// print debug message
+// print debug message
 	printk(KERN_EMERG "LIFO DRIVER : LOADING\n");
 
-	// allocate and init lifo device info
+// allocate and init lifo device info
 	if (init_lifo_device_structure() == 0) {
 		// print debug msg
 		printk(KERN_DEBUG "LIFO DRIVER : INIT FAIL(MEMORY ALLOCATION)\n");
@@ -302,7 +312,7 @@ static int __init lifo_device_init(void) {
 		return -1;
 	}
 
-	// allocate first major and minor number and register device region
+// allocate first major and minor number and register device region
 	if (alloc_chrdev_region(&first, 0, 1, DRIVER_NAME) < 0) {
 		// print debug msg
 		printk(KERN_DEBUG "LIFO DRIVER : INIT FAIL(ALLOC CHR DEV)\n");
@@ -310,7 +320,7 @@ static int __init lifo_device_init(void) {
 		return -1;
 	}
 
-	// create device class
+// create device class
 	if ((dev->classp = class_create(THIS_MODULE, DRIVER_CLASS_NAME)) == NULL) {
 		// print debug info
 		printk(KERN_DEBUG "LIFO DRIVER : INIT FAIL(CREATE_DEV_CLASS)\n");
@@ -320,7 +330,7 @@ static int __init lifo_device_init(void) {
 		return -1;
 	}
 
-	// create device and register with sysfs
+// create device and register with sysfs
 	if (device_create(dev->classp, NULL, first, NULL,
 	DRIVER_DEVICE_FILE_NAME) == NULL) {
 		// print debug info
@@ -333,18 +343,18 @@ static int __init lifo_device_init(void) {
 		return -1;
 	}
 
-	// set owner of cdev
+// set owner of cdev
 	dev->cdev.owner = THIS_MODULE;
-	// set file operations of cdev
+// set file operations of cdev
 	dev->cdev.ops = &lifo_ops;
 
-	// init semaphore
+// init semaphore
 	sema_init(&dev->sem, 1);
 
-	// init cdev
+// init cdev
 	cdev_init(&dev->cdev, &lifo_ops);
 
-	// add the device to the system
+// add the device to the system
 	if (cdev_add(&dev->cdev, first, 1) == -1) {
 		// print debug info
 		printk(KERN_DEBUG "LIFO DRIVER : INIT FAIL\n");
@@ -358,30 +368,30 @@ static int __init lifo_device_init(void) {
 		return -1;
 	}
 
-	// save the allocated major number
+// save the allocated major number
 	dev->major_number = MAJOR(first);
-	// save the allocated minor number
+// save the allocated minor number
 	dev->minor_number = MINOR(first);
-	// print debug info
+// print debug info
 	printk(KERN_DEBUG "LIFO DRIVER : INIT SUCCESS\n");
-	// return success code
+// return success code
 	return 0;
 }
 
 static void __exit lifo_device_exit(void) {
-	// get the first device major/minor
+// get the first device major/minor
 	dev_t first = MKDEV(dev->major_number, dev->minor_number);
-	// delete character device
+// delete character device
 	cdev_del(&dev->cdev);
-	// destroy device
+// destroy device
 	device_destroy(dev->classp, first);
-	// destroy device class
+// destroy device class
 	class_destroy(dev->classp);
-	// unregister device region
+// unregister device region
 	unregister_chrdev_region(first, 1);
-	// free allocated memory
+// free allocated memory
 	free_dummy_device();
-	// print debug message
+// print debug message
 	printk(KERN_EMERG "LIFO DRIVER : UNLOADED\n");
 }
 

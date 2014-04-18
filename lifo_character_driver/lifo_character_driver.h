@@ -25,8 +25,6 @@
 #define DRIVER_DEFAULT_BLOCK_SIZE 1024
 // number of maximum blocks
 #define DRIVER_DEFAULT_MAX_BLOCKS 10
-// default read chunk size
-#define DRIVER_DEFAULT_READ_CHUNK_SIZE 3
 // driver name
 #define DRIVER_NAME	"lifo_chr_driver"
 // driver class
