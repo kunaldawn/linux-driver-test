@@ -1,1 +1,0 @@
-cmd_/home/kunaldawn/Desktop/TEST/lindrivertest/lifo_character_driver/lifocdev.o := ld -m elf_i386   -r -o /home/kunaldawn/Desktop/TEST/lindrivertest/lifo_character_driver/lifocdev.o /home/kunaldawn/Desktop/TEST/lindrivertest/lifo_character_driver/memory_manager.o /home/kunaldawn/Desktop/TEST/lindrivertest/lifo_character_driver/lifo_character_driver.o 
